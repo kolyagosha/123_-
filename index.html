@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSRM | Система Самоконтролю Результатів Моніторингу</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        /* Language Switcher */
+        .language-switcher {
+            display: flex;
+            background: #f0f0f0;
+            border-radius: 25px;
+            padding: 0.25rem;
+            gap: 0.25rem;
+        }
+
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .lang-btn:hover {
+            color: #667eea;
+        }
+
+        .lang-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .hero-section {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            color: white;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 3rem;
+            line-height: 1.6;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem 2.5rem;
+            min-width: 280px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .cta-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .cta-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .student-card .cta-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .instructor-card .cta-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .cta-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #333;
+            margin: 0;
+        }
+
+        .cta-description {
+            font-size: 0.95rem;
+            color: #666;
+            margin: 0;
+        }
+
+        .cta-arrow {
+            margin-top: 0.5rem;
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .cta-card:hover .cta-arrow {
+            transform: translateX(5px);
+        }
+
+        /* Features Section */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 4rem;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-text {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-text {
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .hero-description {
+                font-size: 1rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .cta-card {
+                width: 100%;
+                max-width: 350px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="#" class="logo">
+                <div class="logo-icon">S</div>
+                <span>SSRM</span>
+            </a>
+            <nav class="nav-controls">
+                <div class="language-switcher">
+                    <button class="lang-btn active" data-lang="uk">🇺🇦 УКР</button>
+                    <button class="lang-btn" data-lang="en">🇬🇧 ENG</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="hero-section">
+            <div class="hero-badge">🎓 Сучасна освіта</div>
+            
+            <h1 class="hero-title" data-translate="hero-title">
+                SSRM
+            </h1>
+            
+            <h2 class="hero-subtitle" data-translate="hero-subtitle">
+                Система Самоконтролю Результатів Моніторингу
+            </h2>
+            
+            <p class="hero-description" data-translate="hero-description">
+                Платформа для об'єктивної онлайн-здачі заліку з фізкультури та отримання Індивідуального Фітнес-Сертифіката без відвідування загальних занять
+            </p>
+
+            <div class="cta-buttons">
+                <a href="student_login.html" class="cta-card student-card">
+                    <div class="cta-icon">🎓</div>
+                    <h3 class="cta-title" data-translate="student-title">Я — Студент</h3>
+                    <p class="cta-description" data-translate="student-desc">Здати залік швидко</p>
+                    <div class="cta-arrow">→</div>
+                </a>
+
+                <a href="instructor_login.html" class="cta-card instructor-card">
+                    <div class="cta-icon">👨‍🏫</div>
+                    <h3 class="cta-title" data-translate="instructor-title">Я — Викладач</h3>
+                    <p class="cta-description" data-translate="instructor-desc">Контроль і Верифікація</p>
+                    <div class="cta-arrow">→</div>
+                </a>
+            </div>
+
+            <!-- Features -->
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <div class="feature-title" data-translate="feature1-title">AI-Верифікація</div>
+                    <div class="feature-text" data-translate="feature1-text">Автоматичний підрахунок повторів</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title" data-translate="feature2-title">Швидко</div>
+                    <div class="feature-text" data-translate="feature2-text">Залік за 5 хвилин</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title" data-translate="feature3-title">Об'єктивно</div>
+                    <div class="feature-icon">⚖️</div>
+                    <div class="feature-text" data-translate="feature3-text">Справедлива оцінка</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏆</div>
+                    <div class="feature-title" data-translate="feature4-title">Сертифікат</div>
+                    <div class="feature-text" data-translate="feature4-text">Офіційний документ</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">hai-guys-space</div>
+            <p class="footer-text" data-translate="footer-text">
+                Стежте за нашими наступними проектами!
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Translations
+        const translations = {
+            uk: {
+                'hero-title': 'SSRM',
+                'hero-subtitle': 'Система Самоконтролю Результатів Моніторингу',
+                'hero-description': 'Платформа для об\'єктивної онлайн-здачі заліку з фізкультури та отримання Індивідуального Фітнес-Сертифіката без відвідування загальних занять',
+                'student-title': 'Я — Студент',
+                'student-desc': 'Здати залік швидко',
+                'instructor-title': 'Я — Викладач',
+                'instructor-desc': 'Контроль і Верифікація',
+                'feature1-title': 'AI-Верифікація',
+                'feature1-text': 'Автоматичний підрахунок повторів',
+                'feature2-title': 'Швидко',
+                'feature2-text': 'Залік за 5 хвилин',
+                'feature3-title': 'Об\'єктивно',
+                'feature3-text': 'Справедлива оцінка',
+                'feature4-title': 'Сертифікат',
+                'feature4-text': 'Офіційний документ',
+                'footer-text': 'Стежте за нашими наступними проектами!'
+            },
+            en: {
+                'hero-title': 'SSRM',
+                'hero-subtitle': 'Self-Control System for Results Monitoring',
+                'hero-description': 'Platform for objective online physical education assessment and Individual Fitness Certificate without attending group classes',
+                'student-title': 'I\'m a Student',
+                'student-desc': 'Pass the exam quickly',
+                'instructor-title': 'I\'m an Instructor',
+                'instructor-desc': 'Control & Verification',
+                'feature1-title': 'AI-Verification',
+                'feature1-text': 'Automatic rep counting',
+                'feature2-title': 'Fast',
+                'feature2-text': 'Pass in 5 minutes',
+                'feature3-title': 'Objective',
+                'feature3-text': 'Fair assessment',
+                'feature4-title': 'Certificate',
+                'feature4-text': 'Official document',
+                'footer-text': 'Follow our upcoming projects!'
+            }
+        };
+
+        // Language switching logic
+        let currentLang = 'uk';
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            
+            // Update all translatable elements
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+
+            // Update active button
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-lang') === lang) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Update HTML lang attribute
+            document.documentElement.lang = lang;
+        }
+
+        // Add click handlers to language buttons
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const lang = btn.getAttribute('data-lang');
+                switchLanguage(lang);
+            });
+        });
+    </script>
+</body>
+</html>
