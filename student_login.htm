@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вхід Студента | SSRM</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Page-specific styles */
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-xl) var(--spacing-lg);
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 700px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .page-title {
+            color: var(--white);
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-extrabold);
+            margin-bottom: var(--spacing-md);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: var(--font-size-lg);
+        }
+
+        .step-card {
+            background: var(--white);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-2xl);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-lg);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-gradient);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--gray-900);
+            margin: 0;
+        }
+
+        .step-description {
+            color: var(--gray-600);
+            margin-bottom: var(--spacing-xl);
+            line-height: 1.6;
+        }
+
+        .setup-section {
+            display: none;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .verification-message,
+        .setup-message {
+            margin-top: var(--spacing-lg);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            font-weight: var(--font-weight-medium);
+            text-align: center;
+        }
+
+        .checkbox-card {
+            background: var(--gray-50);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--gray-200);
+            transition: all var(--transition-base);
+        }
+
+        .checkbox-card:has(input:checked) {
+            border-color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .restriction-details {
+            display: none;
+            margin-top: var(--spacing-lg);
+            padding: var(--spacing-lg);
+            background: var(--warning-light);
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .restriction-details.show {
+            display: block;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-submit {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit::after {
+            content: '→';
+            position: absolute;
+            right: 20px;
+            transition: transform var(--transition-base);
+        }
+
+        .btn-submit:hover::after {
+            transform: translateX(5px);
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: var(--font-size-2xl);
+            }
+
+            .step-card {
+                padding: var(--spacing-xl);
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">S</div>
+                <span>SSRM</span>
+            </a>
+            <nav class="nav-controls">
+                <div class="language-switcher">
+                    <button class="lang-btn active" data-lang="uk">🇺🇦 УКР</button>
+                    <button class="lang-btn" data-lang="en">🇬🇧 ENG</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="login-container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title" data-translate="student-login-title">
+                    Вхід та Активація Профілю
+                </h1>
+                <p class="page-subtitle">
+                    🎓 Швидкий та безпечний спосіб здати залік онлайн
+                </p>
+            </div>
+
+            <!-- Step 1: Verification -->
+            <div id="verificationSection" class="step-card">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div>
+                        <h2 class="step-title" data-translate="step1-title">
+                            Крок 1: Ідентифікація (Код ВНЗ)
+                        </h2>
+                    </div>
+                </div>
+
+                <p class="step-description" data-translate="step1-description">
+                    Для первинного входу знайдіть себе у списку та введіть код активації, отриманий у деканаті.
+                </p>
+
+                <form id="verificationForm">
+                    <div class="form-group">
+                        <label for="studentSelect" class="form-label" data-translate="your-name">
+                            Ваше Прізвище та Ім'я:
+                        </label>
+                        <select class="form-control form-select" id="studentSelect" required>
+                            <option value="" data-translate="select-yourself">Виберіть себе...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="universityCode" class="form-label" data-translate="activation-code">
+                            Код Активації ВНЗ:
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="universityCode" 
+                            placeholder="ALPHA123"
+                            required
+                            style="text-transform: uppercase;">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block btn-submit">
+                        <span data-translate="verify-button">Перевірити та Активувати</span>
+                    </button>
+
+                    <div id="verificationMessage" class="verification-message"></div>
+                </form>
+            </div>
+
+            <!-- Step 2: Profile Setup -->
+            <div id="setupSection" class="step-card setup-section">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div>
+                        <h2 class="step-title" data-translate="step2-title">
+                            Крок 2: Створення Профілю та Пароля
+                        </h2>
+                    </div>
+                </div>
+
+                <form id="setupForm">
+                    <!-- Email & Password -->
+                    <div class="form-group">
+                        <label for="userEmail" class="form-label" data-translate="your-email">
+                            Ваша Електронна пошта (логін):
+                        </label>
+                        <input 
+                            type="email" 
+                            class="form-control" 
+                            id="userEmail" 
+                            placeholder="student@example.com"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userPassword" class="form-label" data-translate="your-password">
+                            Пароль (мінімум 6 символів):
+                        </label>
+                        <input 
+                            type="password" 
+                            class="form-control" 
+                            id="userPassword" 
+                            minlength="6"
+                            required>
+                    </div>
+
+                    <hr style="margin: var(--spacing-xl) 0;">
+
+                    <!-- Physical Data -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userAge" class="form-label" data-translate="age">
+                                Вік (років):
+                            </label>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                id="userAge" 
+                                min="16"
+                                max="100"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userHeight" class="form-label" data-translate="height">
+                                Зріст (см):
+                            </label>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                id="userHeight" 
+                                min="140"
+                                max="250"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userWeight" class="form-label" data-translate="weight">
+                                Вага (кг):
+                            </label>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                id="userWeight" 
+                                min="40"
+                                max="200"
+                                required>
+                        </div>
+                    </div>
+
+                    <!-- Health Restrictions -->
+                    <div class="checkbox-card">
+                        <div class="form-check">
+                            <input 
+                                class="form-check-input" 
+                                type="checkbox" 
+                                id="healthRestriction">
+                            <label class="form-check-label" for="healthRestriction" data-translate="health-restrictions">
+                                У мене є обмеження за здоров'ям (довідка).
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="restrictionDetails" class="restriction-details">
+                        <label for="restrictionUpload" class="form-label" data-translate="upload-certificate">
+                            Завантажити скан довідки (JPG/PDF):
+                        </label>
+                        <input 
+                            class="form-control" 
+                            type="file" 
+                            id="restrictionUpload" 
+                            accept=".jpg,.jpeg,.png,.pdf">
+                    </div>
+
+                    <!-- Consent -->
+                    <div class="checkbox-card" style="margin-top: var(--spacing-lg);">
+                        <div class="form-check">
+                            <input 
+                                class="form-check-input" 
+                                type="checkbox" 
+                                id="consentCheck" 
+                                required>
+                            <label class="form-check-label" for="consentCheck" data-translate="consent">
+                                Я згоден з умовами здачі тесту онлайн.
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block btn-submit" style="margin-top: var(--spacing-xl);">
+                        <span data-translate="create-account">Створити Акаунт та Продовжити</span>
+                    </button>
+
+                    <div id="setupMessage" class="setup-message"></div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">hai-guys-space</div>
+            <p class="footer-text" data-translate="footer-text">
+                Стежте за нашими наступними проектами!
+            </p>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script>
+        // ========================================
+        // STUDENT LOGIN PAGE LOGIC
+        // ========================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Populate student select dropdown
+            populateStudentSelect();
+
+            // Form handlers
+            document.getElementById('verificationForm').addEventListener('submit', handleVerification);
+            document.getElementById('setupForm').addEventListener('submit', handleSetup);
+
+            // Health restriction toggle
+            document.getElementById('healthRestriction').addEventListener('change', toggleRestrictionField);
+        });
+
+        // Populate student dropdown with mock data
+        function populateStudentSelect() {
+            const select = document.getElementById('studentSelect');
+            const currentLang = SSRM.langManager.getCurrentLanguage();
+            
+            SSRM.mockStudentData.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.textContent = currentLang === 'uk' ? student.name : student.nameEn;
+                select.appendChild(option);
+            });
+        }
+
+        // Toggle health restriction details
+        function toggleRestrictionField() {
+            const checkbox = document.getElementById('healthRestriction');
+            const details = document.getElementById('restrictionDetails');
+            
+            if (checkbox.checked) {
+                details.classList.add('show');
+            } else {
+                details.classList.remove('show');
+            }
+        }
+
+        // Handle Step 1: Verification
+        function handleVerification(event) {
+            event.preventDefault();
+            
+            const studentId = document.getElementById('studentSelect').value;
+            const universityCode = document.getElementById('universityCode').value.toUpperCase().trim();
+            const messageDiv = document.getElementById('verificationMessage');
+            
+            // Validation
+            if (!studentId) {
+                SSRM.toast.error('Будь ласка, виберіть себе зі списку');
+                return;
+            }
+            
+            if (!universityCode) {
+                SSRM.toast.error('Введіть код активації');
+                return;
+            }
+            
+            // Find student in mock data
+            const selectedStudent = SSRM.mockStudentData.find(s => s.id === studentId);
+            
+            if (selectedStudent && selectedStudent.code === universityCode) {
+                // SUCCESS!
+                messageDiv.innerHTML = `<div class="alert alert-success" data-translate="code-correct">
+                    ✅ Код вірний! Переходимо до створення акаунту...
+                </div>`;
+                
+                SSRM.toast.success(SSRM.langManager.translate('code-correct'));
+                
+                // Save student ID
+                SSRM.Storage.set('currentStudentId', studentId);
+                
+                // Show step 2 after delay
+                setTimeout(() => {
+                    document.getElementById('verificationSection').style.display = 'none';
+                    document.getElementById('setupSection').style.display = 'block';
+                    
+                    // Smooth scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 1500);
+                
+            } else {
+                // ERROR
+                messageDiv.innerHTML = `<div class="alert alert-danger" data-translate="code-incorrect">
+                    ❌ Невірний код або студент. Перевірте дані.
+                </div>`;
+                
+                SSRM.toast.error(SSRM.langManager.translate('code-incorrect'));
+            }
+        }
+
+        // Handle Step 2: Profile Setup
+        function handleSetup(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('userEmail').value;
+            const password = document.getElementById('userPassword').value;
+            const age = document.getElementById('userAge').value;
+            const height = document.getElementById('userHeight').value;
+            const weight = document.getElementById('userWeight').value;
+            const hasRestriction = document.getElementById('healthRestriction').checked;
+            const messageDiv = document.getElementById('setupMessage');
+            
+            // Validation
+            if (!SSRM.FormValidator.validateEmail(email)) {
+                SSRM.toast.error('Невірний формат email');
+                SSRM.FormValidator.showError(
+                    document.getElementById('userEmail'), 
+                    'Невірний формат email'
+                );
+                return;
+            }
+            
+            if (!SSRM.FormValidator.validatePassword(password)) {
+                SSRM.toast.error('Пароль має бути мінімум 6 символів');
+                SSRM.FormValidator.showError(
+                    document.getElementById('userPassword'), 
+                    'Мінімум 6 символів'
+                );
+                return;
+            }
+            
+            if (!SSRM.FormValidator.validateNumber(age, 16, 100)) {
+                SSRM.toast.error('Вік має бути від 16 до 100 років');
+                return;
+            }
+            
+            // Clear any previous errors
+            SSRM.FormValidator.clearError(document.getElementById('userEmail'));
+            SSRM.FormValidator.clearError(document.getElementById('userPassword'));
+            
+            // Get student data
+            const studentId = SSRM.Storage.get('currentStudentId');
+            const student = SSRM.mockStudentData.find(s => s.id === studentId);
+            
+            // Create profile object
+            const profile = {
+                studentId: studentId,
+                email: email,
+                age: parseInt(age),
+                height: parseInt(height),
+                weight: parseInt(weight),
+                hasRestriction: hasRestriction,
+                faculty: student.faculty,
+                group: student.group,
+                createdAt: new Date().toISOString()
+            };
+            
+            // Save profile (in real app: Firebase)
+            SSRM.Storage.set('studentProfile', profile);
+            
+            // Show success message
+            messageDiv.innerHTML = `<div class="alert alert-success" data-translate="account-created">
+                🎉 Акаунт створено! Перехід до тесту...
+            </div>`;
+            
+            SSRM.toast.success(SSRM.langManager.translate('account-created'), 3000);
+            
+            // Redirect to quest page
+            setTimeout(() => {
+                window.location.href = 'student_ultimate_quest.html';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
