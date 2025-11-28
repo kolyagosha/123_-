@@ -300,5 +300,86 @@
             });
         });
     </script>
+    // =====================================
+// НОВАЯ ФУНКЦИЯ: ПЕРЕВОД ДИНАМИЧЕСКИХ ЭЛЕМЕНТОВ
+// =====================================
+function translateDynamicElements() {
+    // 1. Перевод статических элементов на странице
+    SSRM.langManager.updateTranslations(); 
+    
+    // 2. Перевод заголовка
+    const currentUser = SSRM.Auth.getCurrentUser();
+    const instructorAccount = SSRM.mockInstructorAccounts.find(acc => acc.id === currentUser.id);
+    const name = instructorAccount ? instructorAccount.name : 'Викладач';
+    let welcomeMessageKey = currentUser.type === 'hod' ? 'welcome-hod' : 'welcome-professor';
+    const initialTaskCount = mockTasks.filter(task => task.assignedTo === currentUser.id).length;
+    
+    document.getElementById('welcomeHeader').textContent = 
+        `${SSRM.langManager.translate(welcomeMessageKey)} ${name}! ${SSRM.langManager.translate('my-tasks')}: ${initialTaskCount}`;
+
+    // 3. Перевод всех элементов внутри карточек
+    document.querySelectorAll('.task-card').forEach(card => {
+        card.querySelectorAll('[data-translate]').forEach(el => {
+            const key = el.getAttribute('data-translate');
+            el.textContent = SSRM.langManager.translate(key);
+        });
+        
+        // Перевод надписи "Термін/Deadline" внутри urgency-badge
+        const urgencyBadge = card.querySelector('.urgency-badge');
+        if(urgencyBadge) {
+            // Для корректного перевода срока, нужно перерендерить карточку 
+            // или обновить ее innerHTML. Проще всего перерендерить.
+        }
+    });
+
+    // 4. Так как надписи срочности генерируются сложно (urgency.displayDays),
+    // Проще всего полностью перерендерить список заданий, 
+    // чтобы все динамические строки (вроде "days", "дн.", "OVERDUE") обновились.
+    const sortBySelect = document.getElementById('sortBy');
+    loadTasks(currentUser.id, sortBySelect.value);
+
+    // 5. Обновление опций сортировки
+    document.querySelectorAll('#sortBy option').forEach(option => {
+        const key = option.getAttribute('data-translate');
+        if (key) {
+            option.textContent = SSRM.langManager.translate(key);
+        }
+    });
+}
+
+
+// =====================================
+// ГОЛОВНА ІНІЦІАЛІЗАЦІЯ (Обновленный блок)
+// =====================================
+document.addEventListener('DOMContentLoaded', () => {
+    SSRM.langManager.init(); 
+    const currentUser = SSRM.Auth.getCurrentUser();
+    const sortBySelect = document.getElementById('sortBy');
+    
+    // ... (код проверки аутентификации остается неизменным) ...
+    if (!SSRM.Auth.isAuthenticated() || currentUser.type === 'student') {
+        window.location.href = 'instructor_login.html';
+        return;
+    }
+
+    // Инициализация при первой загрузке
+    translateDynamicElements(); 
+
+    // Обработчик изменения сортування (остается прежним)
+    sortBySelect.addEventListener('change', (e) => {
+        loadTasks(currentUser.id, e.target.value);
+    });
+
+    // 6. Обновленный обработчик изменения языка
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Задержка 50мс нужна, чтобы SSRM.langManager успел обновить localStorage 
+            // и атрибут 'lang' перед тем, как мы начнем перерендеринг.
+            setTimeout(() => {
+                translateDynamicElements(); 
+            }, 50);
+        });
+    });
+});
 </body>
 </html>
