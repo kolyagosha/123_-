@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прискорена Сертифікація | SSRM</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Page-specific styles */
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: var(--spacing-xl) var(--spacing-lg);
+        }
+
+        .quest-container {
+            max-width: 900px;
+            margin: 0 auto;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+            padding: var(--spacing-2xl);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-2xl);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .page-title {
+            color: var(--white);
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-extrabold);
+            margin-bottom: var(--spacing-md);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-description {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: var(--font-size-lg);
+            line-height: 1.6;
+        }
+
+        .quest-badge {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.3);
+            color: var(--white);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--radius-full);
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--spacing-md);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .step-card {
+            background: var(--white);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-2xl);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .step-header {
+            padding: var(--spacing-lg) var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-xl);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .step-header.step-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: var(--white);
+        }
+
+        .step-header.step-primary {
+            background: var(--primary-gradient);
+            color: var(--white);
+        }
+
+        .step-header.step-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: var(--gray-900);
+        }
+
+        .step-header.step-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: var(--white);
+        }
+
+        .step-icon {
+            font-size: var(--font-size-3xl);
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            margin: 0;
+        }
+
+        .control-word-display {
+            background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+            padding: var(--spacing-2xl);
+            border-radius: var(--radius-xl);
+            text-align: center;
+            margin: var(--spacing-xl) 0;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-word-display::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .control-word-label {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .control-word {
+            font-size: var(--font-size-4xl);
+            font-weight: var(--font-weight-extrabold);
+            color: var(--white);
+            letter-spacing: 0.2em;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            font-family: 'Courier New', monospace;
+            position: relative;
+            z-index: 1;
+        }
+
+        .instruction-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .instruction-list li {
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            background: var(--gray-50);
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--primary-color);
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .instruction-number {
+            background: var(--primary-color);
+            color: var(--white);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-sm);
+            flex-shrink: 0;
+        }
+
+        .pulse-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .pulse-input-group {
+            text-align: center;
+        }
+
+        .pulse-label {
+            display: block;
+            font-weight: var(--font-weight-semibold);
+            color: var(--gray-700);
+            margin-bottom: var(--spacing-sm);
+            font-size: var(--font-size-sm);
+        }
+
+        .pulse-input {
+            width: 100%;
+            padding: var(--spacing-lg);
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            text-align: center;
+            border: 3px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-base);
+        }
+
+        .pulse-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: scale(1.05);
+        }
+
+        .video-upload-area {
+            border: 3px dashed var(--gray-300);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            text-align: center;
+            transition: all var(--transition-base);
+            background: var(--gray-50);
+            cursor: pointer;
+        }
+
+        .video-upload-area:hover {
+            border-color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .video-upload-area.has-file {
+            border-color: var(--success-color);
+            background: rgba(40, 167, 69, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-md);
+            opacity: 0.5;
+        }
+
+        .video-upload-area.has-file .upload-icon {
+            opacity: 1;
+        }
+
+        .file-info {
+            display: none;
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: var(--white);
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .confirm-checkbox {
+            background: rgba(255, 193, 7, 0.1);
+            border: 2px solid var(--warning-color);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            margin: var(--spacing-xl) 0;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: var(--spacing-xl);
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .submit-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .submit-button span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-indicator {
+            display: none;
+            margin-top: var(--spacing-xl);
+            padding: var(--spacing-xl);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+
+        .progress-indicator.show {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: var(--gray-200);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin: var(--spacing-md) 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            width: 0;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: var(--font-weight-bold);
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: var(--font-size-2xl);
+            }
+
+            .control-word {
+                font-size: var(--font-size-2xl);
+                letter-spacing: 0.1em;
+            }
+
+            .pulse-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .step-card {
+                padding: var(--spacing-xl);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">S</div>
+                <span>SSRM</span>
+            </a>
+            <nav class="nav-controls">
+                <div class="language-switcher">
+                    <button class="lang-btn active" data-lang="uk">🇺🇦 УКР</button>
+                    <button class="lang-btn" data-lang="en">🇬🇧 ENG</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="quest-container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="quest-badge">🏆 Офіційна Сертифікація</div>
+                <h1 class="page-title" data-translate="quest-title">
+                    Прискорена Сертифікація (Залік за Семестр!)
+                </h1>
+                <p class="page-description" data-translate="quest-description">
+                    Виконайте весь комплекс безперервно. Загальна тривалість відео — до 5 хвилин.
+                </p>
+            </div>
+
+            <form id="questSubmissionForm">
+                <!-- Step 1: Verification -->
+                <div class="step-card">
+                    <div class="step-header step-success">
+                        <div class="step-icon">🔐</div>
+                        <h2 class="step-title" data-translate="quest-step1">
+                            Крок 1: Верифікація та Початок
+                        </h2>
+                    </div>
+
+                    <div class="card-body">
+                        <p class="text-center mb-2">
+                            <strong>1.</strong> Згенеруйте та запишіть слово.
+                        </p>
+
+                        <div class="control-word-display">
+                            <div class="control-word-label" data-translate="control-word">
+                                КОНТРОЛЬНЕ СЛОВО:
+                            </div>
+                            <div class="control-word" id="controlWordDisplay">
+                                LOADING
+                            </div>
+                        </div>
+
+                        <p class="text-center text-muted" data-translate="control-word-instruction">
+                            <strong>2.</strong> Увімкніть запис та <strong>голосно вимовте це слово</strong> перед початком вправ.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 2: Exercise Complex -->
+                <div class="step-card">
+                    <div class="step-header step-primary">
+                        <div class="step-icon">💪</div>
+                        <h2 class="step-title" data-translate="quest-step2">
+                            Крок 2: Комплекс Вправ (Максимум 3 Хвилини)
+                        </h2>
+                    </div>
+
+                    <div class="card-body">
+                        <ol class="instruction-list">
+                            <li>
+                                <div class="instruction-number">1</div>
+                                <div>
+                                    <strong data-translate="pulse-before">P1 (Пульс до):</strong> 
+                                    Виміряйте та запишіть пульс до початку запису.
+                                </div>
+                            </li>
+                            <li>
+                                <div class="instruction-number">2</div>
+                                <div>
+                                    <strong>Віджимання:</strong> 30 повторів з правильною технікою.
+                                </div>
+                            </li>
+                            <li>
+                                <div class="instruction-number">3</div>
+                                <div>
+                                    <strong>Присідання:</strong> 20 повторів (глибокі присідання).
+                                </div>
+                            </li>
+                            <li>
+                                <div class="instruction-number">4</div>
+                                <div>
+                                    <strong>Планка:</strong> Утримання 30 секунд (рівна спина).
+                                </div>
+                            </li>
+                            <li>
+                                <div class="instruction-number">5</div>
+                                <div>
+                                    На відео має бути видно <strong>таймер</strong> (для підтвердження часу &lt; 3 хв).
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Step 3: Recovery Tracking -->
+                <div class="step-card">
+                    <div class="step-header step-warning">
+                        <div class="step-icon">❤️</div>
+                        <h2 class="step-title" data-translate="quest-step3">
+                            Крок 3: Фіксація Відновлення
+                        </h2>
+                    </div>
+
+                    <div class="card-body">
+                        <p class="text-muted text-center mb-3">
+                            Введіть показання пульсу одразу після завершення комплексу:
+                        </p>
+
+                        <div class="pulse-grid">
+                            <div class="pulse-input-group">
+                                <label class="pulse-label" data-translate="pulse-before">
+                                    P1 (До)
+                                </label>
+                                <input 
+                                    type="number" 
+                                    class="pulse-input" 
+                                    id="pulseP1" 
+                                    placeholder="72"
+                                    min="40"
+                                    max="200"
+                                    required>
+                            </div>
+                            <div class="pulse-input-group">
+                                <label class="pulse-label" data-translate="pulse-after">
+                                    P2 (Після)
+                                </label>
+                                <input 
+                                    type="number" 
+                                    class="pulse-input" 
+                                    id="pulseP2" 
+                                    placeholder="155"
+                                    min="40"
+                                    max="220"
+                                    required>
+                            </div>
+                            <div class="pulse-input-group">
+                                <label class="pulse-label" data-translate="pulse-recovery">
+                                    P3 (1 хв)
+                                </label>
+                                <input 
+                                    type="number" 
+                                    class="pulse-input" 
+                                    id="pulseP3" 
+                                    placeholder="95"
+                                    min="40"
+                                    max="200"
+                                    required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Video Upload -->
+                <div class="step-card">
+                    <div class="step-header step-danger">
+                        <div class="step-icon">📹</div>
+                        <h2 class="step-title" data-translate="quest-step4">
+                            Крок 4: Завантаження Доказів
+                        </h2>
+                    </div>
+
+                    <div class="card-body">
+                        <label for="videoUpload" class="form-label" data-translate="upload-video">
+                            Завантажте відео комплексу (макс. 50 МБ):
+                        </label>
+
+                        <div class="video-upload-area" id="uploadArea">
+                            <div class="upload-icon">📹</div>
+                            <p><strong>Клацніть</strong> або перетягніть відео сюди</p>
+                            <p class="text-muted" style="font-size: var(--font-size-sm);">
+                                Підтримувані формати: MP4, MOV, AVI (макс. 50 МБ)
+                            </p>
+                            <input 
+                                type="file" 
+                                id="videoUpload" 
+                                accept="video/*"
+                                style="display: none;"
+                                required>
+                        </div>
+
+                        <div class="file-info" id="fileInfo">
+                            <strong>Обраний файл:</strong>
+                            <div id="fileName" style="margin-top: var(--spacing-sm);"></div>
+                            <button type="button" class="btn btn-sm btn-outline mt-2" id="changeFileBtn">
+                                Змінити файл
+                            </button>
+                        </div>
+
+                        <div class="confirm-checkbox">
+                            <div class="form-check">
+                                <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    id="confirmCheckbox" 
+                                    required>
+                                <label class="form-check-label" for="confirmCheckbox" data-translate="confirm-completion">
+                                    Я підтверджую, що виконав весь комплекс безперервно за час <strong>менше 3 хвилин</strong>.
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary submit-button" id="submitQuestButton">
+                            <span data-translate="submit-quest">🚀 Відправити на перевірку</span>
+                        </button>
+
+                        <div class="progress-indicator" id="progressIndicator">
+                            <p><strong>Завантаження відео...</strong></p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill">0%</div>
+                            </div>
+                            <p class="text-muted" style="font-size: var(--font-size-sm);">
+                                Будь ласка, не закривайте цю сторінку
+                            </p>
+                        </div>
+
+                        <div id="submissionMessage" style="margin-top: var(--spacing-lg);"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">hai-guys-space</div>
+            <p class="footer-text" data-translate="footer-text">
+                Стежте за нашими наступними проектами!
+            </p>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script>
+        // ========================================
+        // QUEST PAGE LOGIC
+        // ========================================
+
+        let selectedFile = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Generate and display control word
+            SSRM.displayControlWord();
+
+            // Setup file upload
+            setupFileUpload();
+
+            // Form submission
+            document.getElementById('questSubmissionForm').addEventListener('submit', handleQuestSubmission);
+        });
+
+        // Setup file upload interactions
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('videoUpload');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const changeFileBtn = document.getElementById('changeFileBtn');
+
+            // Click to upload
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // File selected
+            fileInput.addEventListener('change', (e) => {
+                handleFileSelect(e.target.files[0]);
+            });
+
+            // Change file button
+            changeFileBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                fileInput.click();
+            });
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--primary-color)';
+                uploadArea.style.background = 'rgba(102, 126, 234, 0.1)';
+            });
+
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '';
+                uploadArea.style.background = '';
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '';
+                uploadArea.style.background = '';
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+        }
+
+        // Handle file selection
+        function handleFileSelect(file) {
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.startsWith('video/')) {
+                SSRM.toast.error('Будь ласка, виберіть відео файл');
+                return;
+            }
+
+            // Validate file size (50MB)
+            const maxSize = 50 * 1024 * 1024;
+            if (file.size > maxSize) {
+                SSRM.toast.error('Файл занадто великий! Максимум 50 МБ');
+                return;
+            }
+
+            selectedFile = file;
+
+            // Update UI
+            document.getElementById('uploadArea').classList.add('has-file');
+            document.getElementById('fileName').textContent = `📹 ${file.name} (${formatFileSize(file.size)})`;
+            document.getElementById('fileInfo').classList.add('show');
+
+            SSRM.toast.success('Відео вибрано успішно!');
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Handle quest submission
+        function handleQuestSubmission(event) {
+            event.preventDefault();
+
+            // Get form data
+            const controlWord = document.getElementById('controlWordDisplay').textContent;
+            const pulseP1 = document.getElementById('pulseP1').value;
+            const pulseP2 = document.getElementById('pulseP2').value;
+            const pulseP3 = document.getElementById('pulseP3').value;
+            const isConfirmed = document.getElementById('confirmCheckbox').checked;
+
+            // Validation
+            if (!pulseP1 || !pulseP2 || !pulseP3) {
+                SSRM.toast.error('Будь ласка, введіть всі показники пульсу');
+                return;
+            }
+
+            if (!selectedFile) {
+                SSRM.toast.error('Будь ласка, завантажте відео');
+                return;
+            }
+
+            if (!isConfirmed) {
+                SSRM.toast.error('Підтвердіть виконання комплексу');
+                return;
+            }
+
+            // Validate pulse values
+            if (!SSRM.FormValidator.validateNumber(pulseP1, 40, 200)) {
+                SSRM.toast.error('P1 має бути між 40 і 200');
+                return;
+            }
+
+            if (!SSRM.FormValidator.validateNumber(pulseP2, 40, 220)) {
+                SSRM.toast.error('P2 має бути між 40 і 220');
+                return;
+            }
+
+            if (!SSRM.FormValidator.validateNumber(pulseP3, 40, 200)) {
+                SSRM.toast.error('P3 має бути між 40 і 200');
+                return;
+            }
+
+            // Disable submit button
+            const submitBtn = document.getElementById('submitQuestButton');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>⏳ Завантаження...</span>';
+
+            // Show progress
+            const progressIndicator = document.getElementById('progressIndicator');
+            progressIndicator.classList.add('show');
+
+            // Simulate upload progress
+            simulateUpload(() => {
+                // Create quest result object
+                const studentId = SSRM.Storage.get('currentStudentId') || 'S_UNKNOWN';
+                const profile = SSRM.Storage.get('studentProfile') || {};
+
+                const questResult = {
+                    id: 'Q' + Date.now(),
+                    studentId: studentId,
+                    studentName: profile.studentName || 'Student',
+                    faculty: profile.faculty || 'Unknown',
+                    group: profile.group || 'Unknown',
+                    dateSubmitted: new Date().toISOString(),
+                    controlWordUsed: controlWord,
+                    videoFileName: selectedFile.name,
+                    videoSize: selectedFile.size,
+                    pulseP1: parseInt(pulseP1),
+                    pulseP2: parseInt(pulseP2),
+                    pulseP3: parseInt(pulseP3),
+                    status: 'Очікує Перевірки Викладачем',
+                    checkDeadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+                    assignedInstructorId: profile.assignedInstructorId || 'I001'
+                };
+
+                // Save to localStorage (in real app: Firebase)
+                SSRM.Storage.set('lastQuestResult', questResult);
+
+                // Show success message
+                document.getElementById('submissionMessage').innerHTML = `
+                    <div class="alert alert-success">
+                        🎉 <strong data-translate="quest-submitted">Тест відправлено! Перехід на сторінку статусу...</strong>
+                    </div>
+                `;
+
+                SSRM.toast.success(SSRM.langManager.translate('quest-submitted'), 3000);
+
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = 'student_dashboard.html';
+                }, 2000);
+            });
+        }
+
+        // Simulate upload progress
+        function simulateUpload(callback) {
+            const progressFill = document.getElementById('progressFill');
+            let progress = 0;
+
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+
+                progressFill.style.width = progress + '%';
+                progressFill.textContent = Math.round(progress) + '%';
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(callback, 500);
+                }
+            }, 200);
+        }
+    </script>
+</body>
+</html>
