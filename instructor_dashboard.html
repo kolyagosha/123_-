@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="verification-panel">Панель Верифікації SSRM</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Стилі для Дашборда */
+        .dashboard-layout {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xl);
+            padding: var(--spacing-xl) 0;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .task-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .task-card {
+            border: 1px solid var(--gray-300);
+            transition: transform var(--transition-base), box-shadow var(--transition-base);
+            position: relative;
+        }
+        
+        .task-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .urgency-badge {
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            font-size: var(--font-size-sm);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-full);
+            color: var(--white);
+            font-weight: var(--font-weight-bold);
+        }
+        
+        .urgency-success { background-color: var(--success-color); }
+        .urgency-warning { background-color: var(--warning-color); color: var(--gray-900); }
+        .urgency-danger { background-color: var(--danger-color); }
+        .urgency-dark { background-color: var(--gray-800); } /* Для прострочених */
+
+        .task-details {
+            font-size: var(--font-size-sm);
+            color: var(--gray-700);
+        }
+
+        .card-footer-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column" style="min-height: 100vh; background: var(--gray-100);">
+
+    <header class="header">
+        <div class="header-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">S</div>
+                <span>SSRM</span>
+            </a>
+            <nav class="nav-controls gap-md">
+                <a href="#" class="text-muted fw-semibold" onclick="SSRM.Auth.logout(); window.location.href='index.html';" data-translate="logout">Вихід</a>
+                <div class="language-switcher">
+                    <button class="lang-btn" data-lang="uk">🇺🇦 УКР</button>
+                    <button class="lang-btn" data-lang="en">🇬🇧 ENG</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container dashboard-layout">
+            
+            <h2 class="fw-bold text-gray-800" id="welcomeHeader">
+                </h2>
+            
+            <div class="d-flex justify-content-between align-center flex-wrap gap-md">
+                <h4 class="m-0" data-translate="my-tasks">Мої Завдання</h4>
+                <div class="d-flex align-center gap-sm">
+                    <label for="sortBy" data-translate="sort-by">Сортувати за:</label>
+                    <select id="sortBy" class="form-control form-select">
+                        <option value="deadline" data-translate="sort-deadline">За терміном перевірки (спочатку найтерміновіші)</option>
+                        <option value="name" data-translate="sort-name">За прізвищем студента</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="taskList" class="task-list">
+                </div>
+
+            <div id="loadingIndicator"></div>
+            
+            <div id="noTasksMessage" class="alert alert-info d-none">
+                Ура! Наразі всі заліки перевірено. Можна випити кави.
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">hai-guys.space</div>
+            <p class="footer-text" data-translate="footer-text">
+                Стежте за нашими наступними проектами!
+            </p>
+        </div>
+    </footer>
+    
+    <script src="main.js"></script> 
+    
+    <script>
+        // Імітація даних для дашборда (це імітує дані, отримані з бази)
+        const mockTasks = [
+            { id: 'T001', studentId: 'S001', studentName: 'Іванов Іван', faculty: 'ПМ', group: 'ПМ-21', controlWord: 'ALPHA123', P1: 72, P2: 145, P3: 90, submissionDate: new Date(Date.now() - (3 * 24 * 60 * 60 * 1000)), videoUrl: 'video_ivanov.mp4', assignedTo: 'I001' }, // Надіслано 3 дні тому
+            { id: 'T002', studentId: 'S002', studentName: 'Петрова Анна', faculty: 'ЮР', group: 'ЮР-20', controlWord: 'BETA456', P1: 65, P2: 160, P3: 70, submissionDate: new Date(Date.now() - (12 * 24 * 60 * 60 * 1000)), videoUrl: 'video_petrova.mp4', assignedTo: 'I001' }, // Надіслано 12 днів тому (Терміново!)
+            { id: 'T003', studentId: 'S003', studentName: 'Сидоров Олег', faculty: 'ЕК', group: 'ЕК-22', controlWord: 'GAMMA789', P1: 80, P2: 130, P3: 80, submissionDate: new Date(Date.now() - (15 * 24 * 60 * 60 * 1000)), videoUrl: 'video_sidorov.mp4', assignedTo: 'I001' }, // Надіслано 15 днів тому (Прострочено!)
+            { id: 'T004', studentId: 'S004', studentName: 'Ковальчук В.', faculty: 'АРХ', group: 'АРХ-23', controlWord: 'DELTA007', P1: 68, P2: 140, P3: 85, submissionDate: new Date(Date.now() - (6 * 24 * 60 * 60 * 1000)), videoUrl: 'video_kovalchuk.mp4', assignedTo: 'I002' }, // Призначено іншому (не показуємо)
+        ];
+        
+        // =====================================
+        // ФУНКЦІЯ РЕНДЕРИНГУ КАРТОК ЗАВДАНЬ
+        // =====================================
+        function renderTaskCard(task) {
+            const locale = SSRM.langManager.getCurrentLanguage();
+            // 1. Обчислення терміновості за допомогою утиліти з main.js
+            const urgency = SSRM.calculateUrgency(task.submissionDate);
+            
+            // 2. Визначення класів для значка терміновості
+            let urgencyClass = '';
+            if (urgency.daysLeft > 7) { urgencyClass = 'urgency-success'; } 
+            else if (urgency.daysLeft <= 7 && urgency.daysLeft > 0) { urgencyClass = 'urgency-warning'; } 
+            else if (urgency.daysLeft <= 0) { urgencyClass = 'urgency-dark'; } 
+
+            const card = document.createElement('div');
+            card.className = 'card task-card rounded-lg';
+            card.dataset.taskId = task.id;
+
+            // Збираємо HTML-карту
+            card.innerHTML = `
+                <div class="card-body">
+                    <div class="urgency-badge ${urgencyClass}">
+                        <span data-translate="deadline-days">Термін</span>: ${urgency.displayDays}
+                    </div>
+                    
+                    <h4 class="mb-2">${task.studentName} (${task.group})</h4>
+                    <div class="task-details">
+                        <p class="m-0 mb-1"><span class="fw-semibold" data-translate="faculty">Факультет:</span> ${task.faculty}</p>
+                        <p class="m-0 mb-1"><span class="fw-semibold" data-translate="control-word-label">Контрольне Слово:</span> <span class="text-danger fw-bold">${task.controlWord}</span></p>
+                        <p class="m-0 mb-3"><span class="fw-semibold" data-translate="recovery-indicators">Показники Відновлення:</span> P1=${task.P1} / P2=${task.P2} / P3=${task.P3}</p>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="comments-${task.id}" class="form-label" data-translate="comments">Коментарі Викладача:</label>
+                        <textarea id="comments-${task.id}" class="form-control" rows="2" placeholder="Зауваження, якщо є..."></textarea>
+                    </div>
+
+                    <a href="${task.videoUrl}" target="_blank" class="btn btn-outline btn-block mb-3 fw-semibold" data-translate="watch-video">
+                        ДИВИТИСЯ БЕЗПЕРЕРВНЕ ВІДЕО
+                    </a>
+
+                    <div class="card-footer-actions">
+                        <button class="btn btn-success btn-sm flex-fill grade-btn" data-grade="PASS" data-task-id="${task.id}" data-translate="grade-pass">
+                            Поставити ЗАЛІК
+                        </button>
+                        <button class="btn btn-danger btn-sm flex-fill grade-btn" data-grade="FAIL" data-task-id="${task.id}" data-translate="grade-fail">
+                            Поставити НЕЗАЛІК
+                        </button>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        // =====================================
+        // ФУНКЦІЯ ЗАВАНТАЖЕННЯ І СОРТУВАННЯ
+        // =====================================
+        function loadTasks(instructorId, sortBy = 'deadline') {
+            const taskListContainer = document.getElementById('taskList');
+            const noTasksMessage = document.getElementById('noTasksMessage');
+            
+            // 1. Фільтрація: Показуємо завдання, призначені тільки цьому викладачу
+            const filteredTasks = mockTasks.filter(task => task.assignedTo === instructorId);
+
+            // 2. Сортування
+            if (sortBy === 'deadline') {
+                 filteredTasks.sort((a, b) => {
+                    const urgencyA = SSRM.calculateUrgency(a.submissionDate);
+                    const urgencyB = SSRM.calculateUrgency(b.submissionDate);
+                    // Сортуємо за кількістю днів до дедлайну (менше = терміновіше)
+                    return urgencyA.daysLeft - urgencyB.daysLeft;
+                });
+            } else if (sortBy === 'name') {
+                 filteredTasks.sort((a, b) => a.studentName.localeCompare(b.studentName));
+            }
+
+
+            taskListContainer.innerHTML = ''; // Очищаємо список
+            
+            if (filteredTasks.length === 0) {
+                noTasksMessage.classList.remove('d-none');
+                return;
+            } else {
+                noTasksMessage.classList.add('d-none');
+            }
+
+            // 3. Рендеринг карток
+            filteredTasks.forEach(task => {
+                taskListContainer.appendChild(renderTaskCard(task));
+            });
+            
+            // 4. Додавання обробників оцінювання
+            attachGradingListeners();
+        }
+
+        // =====================================
+        // ФУНКЦІЯ ОБРОБКИ ОЦІНЮВАННЯ
+        // =====================================
+        function attachGradingListeners() {
+            document.querySelectorAll('.grade-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const taskId = e.target.dataset.taskId;
+                    const grade = e.target.dataset.grade;
+                    const commentsEl = document.getElementById(`comments-${taskId}`);
+                    const comments = commentsEl.value;
+                    
+                    // У реальному проекті тут був би AJAX-запит до API
+                    // з даними: taskId, grade, comments
+
+                    const taskCard = document.querySelector(`[data-task-id="${taskId}"]`);
+                    
+                    // Імітація збереження даних
+                    taskCard.style.opacity = 0.5;
+                    SSRM.toast.success(`${SSRM.langManager.translate('grade-saved')} Оцінка: ${grade}`, 4000);
+                    
+                    // Видалення завдання через 1 секунду після "збереження"
+                    setTimeout(() => {
+                        taskCard.remove();
+                        // Перевіряємо, чи залишилися завдання
+                        if (document.getElementById('taskList').children.length === 0) {
+                            document.getElementById('noTasksMessage').classList.remove('d-none');
+                        }
+                    }, 1000); 
+                });
+            });
+        }
+        
+        // =====================================
+        // ГОЛОВНА ІНІЦІАЛІЗАЦІЯ
+        // =====================================
+        document.addEventListener('DOMContentLoaded', () => {
+            SSRM.langManager.init(); 
+            const currentUser = SSRM.Auth.getCurrentUser();
+            const welcomeHeader = document.getElementById('welcomeHeader');
+            const sortBySelect = document.getElementById('sortBy');
+
+            // Перевірка автентифікації
+            if (!SSRM.Auth.isAuthenticated() || currentUser.type === 'student') {
+                window.location.href = 'instructor_login.html';
+                return;
+            }
+            
+            // Визначаємо ім'я викладача для привітання
+            const instructorAccount = SSRM.mockInstructorAccounts.find(acc => acc.id === currentUser.id);
+            const name = instructorAccount ? instructorAccount.name : 'Викладач';
+            
+            // Встановлюємо привітання в залежності від ролі
+            let welcomeMessageKey = currentUser.type === 'hod' ? 'welcome-hod' : 'welcome-professor';
+            const initialTaskCount = mockTasks.filter(task => task.assignedTo === currentUser.id).length;
+            
+            welcomeHeader.textContent = `${SSRM.langManager.translate(welcomeMessageKey)} ${name}! Завдань в роботі: ${initialTaskCount}`;
+
+            // Завантаження завдань при старті
+            loadTasks(currentUser.id, sortBySelect.value);
+            
+            // Обробник зміни сортування
+            sortBySelect.addEventListener('change', (e) => {
+                loadTasks(currentUser.id, e.target.value);
+            });
+
+            // Обробка зміни мови
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Повторно оновлюємо заголовок і завдання після зміни мови
+                    setTimeout(() => {
+                        welcomeHeader.textContent = `${SSRM.langManager.translate(welcomeMessageKey)} ${name}! Завдань в роботі: ${initialTaskCount}`;
+                        loadTasks(currentUser.id, sortBySelect.value); // Перерендеринг для перекладу терміновості
+                    }, 50);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
