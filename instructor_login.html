@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="instructor-login-title">Вхід до Панелі Верифікації | SSRM</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Стилі для центрування форми */
+        .login-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-2xl);
+            background: var(--gray-100);
+        }
+
+        .login-card {
+            max-width: 450px;
+            width: 100%;
+            padding: var(--spacing-2xl);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            background: var(--white);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .login-card h2 {
+            color: var(--primary-dark);
+            text-align: center;
+        }
+
+        .login-card p {
+            text-align: center;
+            color: var(--gray-600);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        /* Стилі для індикаторів завантаження та помилок */
+        .feedback-message {
+            margin-top: var(--spacing-md);
+            text-align: center;
+            font-weight: var(--font-weight-semibold);
+        }
+    </style>
+</head>
+<body class="d-flex flex-column" style="min-height: 100vh;">
+
+    <header class="header">
+        <div class="header-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">S</div>
+                <span>SSRM</span>
+            </a>
+            <nav class="nav-controls">
+                <div class="language-switcher">
+                    <button class="lang-btn" data-lang="uk">🇺🇦 УКР</button>
+                    <button class="lang-btn" data-lang="en">🇬🇧 ENG</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="login-container">
+        <div class="login-card">
+            <h2 data-translate="instructor-login-title">Вхід до Панелі Верифікації</h2>
+            <p data-translate="instructor-subtitle" class="text-muted">SSRM: Система Самоконтролю Результатів Моніторингу</p>
+
+            <form id="instructorLoginForm">
+                
+                <div class="form-group">
+                    <label for="email" class="form-label" data-translate="email-login">Email (Логін):</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="prof.ivanov@ssrm.edu" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label" data-translate="password">Пароль:</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+
+                <div id="loadingIndicator" class="d-none">
+                    </div>
+                
+                <div id="loginFeedback" class="feedback-message">
+                    </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg mt-4" data-translate="login-button">
+                    Увійти та Почати Перевірку
+                </button>
+                
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">hai-guys.space</div>
+            <p class="footer-text" data-translate="footer-text">
+                Стежте за нашими наступними проектами!
+            </p>
+        </div>
+    </footer>
+    
+    <script src="main.js"></script> 
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Ініціалізація мови
+            SSRM.langManager.init(); 
+
+            // 2. Елементи
+            const form = document.getElementById('instructorLoginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const loginFeedback = document.getElementById('loginFeedback');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const submitButton = form.querySelector('button[type="submit"]');
+
+            // Перевірка, чи викладач вже залогінений
+            if (SSRM.Auth.isAuthenticated() && SSRM.Auth.getCurrentUser().type !== 'student') {
+                window.location.href = 'instructor_dashboard.html';
+                return;
+            }
+
+            // 3. Обробник форми
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const email = emailInput.value.trim();
+                const password = passwordInput.value.trim();
+                
+                loginFeedback.innerHTML = '';
+                SSRM.FormValidator.clearError(emailInput);
+                SSRM.FormValidator.clearError(passwordInput);
+
+                // Швидка фронтенд-валідація
+                if (!SSRM.FormValidator.validateEmail(email)) {
+                    SSRM.FormValidator.showError(emailInput, 'Введіть коректний Email.');
+                    return;
+                }
+                if (!SSRM.FormValidator.validatePassword(password)) {
+                    SSRM.FormValidator.showError(passwordInput, 'Пароль має бути не менше 6 символів.');
+                    return;
+                }
+
+                // Відображення завантаження
+                SSRM.showLoading(loadingIndicator);
+                submitButton.disabled = true;
+
+                // Імітація Асинхронного запиту (затримка 1 секунда)
+                setTimeout(() => {
+                    SSRM.hideLoading(loadingIndicator);
+                    submitButton.disabled = false;
+                    
+                    // 4. Пошук викладача в мокових даних
+                    const user = SSRM.mockInstructorAccounts.find(acc => 
+                        acc.email === email && acc.password === password
+                    );
+
+                    if (user) {
+                        // УСПІШНИЙ ВХІД
+                        SSRM.Auth.login(user.id, user.role); // Зберігаємо ID та роль (instructor/hod)
+                        
+                        const welcomeMessage = `${SSRM.langManager.translate('welcome-instructor')} ${user.name}!`;
+                        loginFeedback.className = 'feedback-message text-success';
+                        loginFeedback.innerHTML = welcomeMessage;
+                        SSRM.toast.success(welcomeMessage, 2000);
+
+                        // Перенаправлення на дашборд
+                        setTimeout(() => {
+                            window.location.href = 'instructor_dashboard.html';
+                        }, 500);
+
+                    } else {
+                        // НЕВІРНІ ДАНІ
+                        const errorMessage = SSRM.langManager.translate('invalid-credentials');
+                        loginFeedback.className = 'feedback-message text-danger';
+                        loginFeedback.innerHTML = errorMessage;
+                        SSRM.toast.error(errorMessage, 3000);
+                    }
+                }, 1000); // Затримка 1 секунда для імітації мережі
+            });
+        });
+    </script>
+</body>
+</html>
