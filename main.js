@@ -184,7 +184,7 @@ const translations = {
         // Student Login
         'student-login-title': 'Login and Profile Activation',
         'step1-title': 'Step 1: Identification (University Code)',
-        'step1-description': 'For initial login, find yourself in the list and enter the activation code received from the dean's office.',
+        'step1-description': 'For initial login, find yourself in the list and enter the activation code received from the dean\'s office.',
         'select-yourself': 'Select yourself...',
         'your-name': 'Your Last Name and First Name:',
         'activation-code': 'University Activation Code:',
