@@ -165,7 +165,7 @@ const translations = {
         // Buttons
         'student-title': 'I\'m a Student',
         'student-desc': 'Pass the exam quickly',
-        'instructor-title': 'I'm an Instructor',
+        'instructor-title': 'I\'m an Instructor',
         'instructor-desc': 'Control & Verification',
         
         // Features
