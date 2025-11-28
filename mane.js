@@ -29,7 +29,7 @@ const translations = {
         // Hero Section
         'hero-title': 'SSRM',
         'hero-subtitle': 'Система Самоконтролю Результатів Моніторингу',
-        'hero-description': 'Платформа для об\'єктивної онлайн-здачі заліку з фізкультури та отримання Індивідуального Фітнес-Сертифіката без відвідування загальних занять',
+        'hero-description': 'Платформа для об'єктивної онлайн-здачі заліку з фізкультури та отримання Індивідуального Фітнес-Сертифіката без відвідування загальних занять',
         
         // Buttons
         'student-title': 'Я — Студент',
@@ -42,7 +42,7 @@ const translations = {
         'feature1-text': 'Автоматичний підрахунок повторів',
         'feature2-title': 'Швидко',
         'feature2-text': 'Залік за 5 хвилин',
-        'feature3-title': 'Об\'єктивно',
+        'feature3-title': 'Об'єктивно',
         'feature3-text': 'Справедлива оцінка',
         'feature4-title': 'Сертифікат',
         'feature4-text': 'Офіційний документ',
@@ -55,7 +55,7 @@ const translations = {
         'step1-title': 'Крок 1: Ідентифікація (Код ВНЗ)',
         'step1-description': 'Для первинного входу знайдіть себе у списку та введіть код активації, отриманий у деканаті.',
         'select-yourself': 'Виберіть себе...',
-        'your-name': 'Ваше Прізвище та Ім\'я:',
+        'your-name': 'Ваше Прізвище та Ім'я:',
         'activation-code': 'Код Активації ВНЗ:',
         'verify-button': 'Перевірити та Активувати',
         'code-correct': '✅ Код вірний! Переходимо до створення акаунту...',
@@ -67,7 +67,7 @@ const translations = {
         'age': 'Вік (років):',
         'height': 'Зріст (см):',
         'weight': 'Вага (кг):',
-        'health-restrictions': 'У мене є обмеження за здоров\'ям (довідка).',
+        'health-restrictions': 'У мене є обмеження за здоров'ям (довідка).',
         'upload-certificate': 'Завантажити скан довідки (JPG/PDF):',
         'consent': 'Я згоден з умовами здачі тесту онлайн.',
         'create-account': 'Створити Акаунт та Продовжити',
@@ -163,9 +163,9 @@ const translations = {
         'hero-description': 'Platform for objective online physical education assessment and Individual Fitness Certificate without attending group classes',
         
         // Buttons
-        'student-title': 'I\'m a Student',
+        'student-title': 'I'm a Student',
         'student-desc': 'Pass the exam quickly',
-        'instructor-title': 'I\'m an Instructor',
+        'instructor-title': 'I'm an Instructor',
         'instructor-desc': 'Control & Verification',
         
         // Features
@@ -184,7 +184,7 @@ const translations = {
         // Student Login
         'student-login-title': 'Login and Profile Activation',
         'step1-title': 'Step 1: Identification (University Code)',
-        'step1-description': 'For initial login, find yourself in the list and enter the activation code received from the dean\'s office.',
+        'step1-description': 'For initial login, find yourself in the list and enter the activation code received from the dean's office.',
         'select-yourself': 'Select yourself...',
         'your-name': 'Your Last Name and First Name:',
         'activation-code': 'University Activation Code:',
