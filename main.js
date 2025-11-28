@@ -163,7 +163,7 @@ const translations = {
         'hero-description': 'Platform for objective online physical education assessment and Individual Fitness Certificate without attending group classes',
         
         // Buttons
-        'student-title': 'I'm a Student',
+        'student-title': 'I\'m a Student',
         'student-desc': 'Pass the exam quickly',
         'instructor-title': 'I'm an Instructor',
         'instructor-desc': 'Control & Verification',
