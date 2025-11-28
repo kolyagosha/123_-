@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="status-title">Твій Заліковий Статус | SSRM</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Додаткові стилі для дашборду */
+        .dashboard-card {
+            max-width: 700px;
+            width: 100%;
+            padding: var(--spacing-3xl);
+            border-radius: var(--radius-2xl);
+            background: var(--white);
+            box-shadow: var(--shadow-xl);
+            text-align: center;
+        }
+
+        .status-box {
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-extrabold);
+            color: var(--white);
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        /* Спеціальні кольори статусів */
+        .status-review { background: var(--primary-color); } /* Синій/Фіолетовий */
+        .status-passed { background: var(--success-color); } /* Зелений */
+        .status-failed { background: var(--danger-color); } /* Червоний */
+        .status-overdue { background: var(--warning-color); color: var(--gray-900); } /* Жовтий */
+
+        .appeal-section {
+            border-top: 1px solid var(--gray-200);
+            padding-top: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+        }
+    </style>
+</head>
+<body class="d-flex flex-column" style="min-height: 100vh; background: var(--gray-100);">
+
+    <header class="header">
+        <div class="header-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">S</div>
+                <span>SSRM</span>
+            </a>
+            <nav class="nav-controls gap-md">
+                <a href="#" class="text-muted fw-semibold" onclick="SSRM.Auth.logout(); window.location.href='index.html';" data-translate="logout">Вихід</a>
+                <div class="language-switcher">
+                    <button class="lang-btn" data-lang="uk">🇺🇦 УКР</button>
+                    <button class="lang-btn" data-lang="en">🇬🇧 ENG</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content d-flex align-center justify-center p-4" style="flex: 1;">
+        <div class="dashboard-card animate-fadeInUp">
+            <h2 class="mb-3 fw-bold text-primary" data-translate="status-title">SSRM: Твій Заліковий Статус</h2>
+            <p class="text-muted fw-semibold mb-4" id="studentInfo">
+                Студент: Іванов Іван (ПМ-21)
+            </p>
+
+            <div id="statusDisplay">
+                <div class="status-box status-review" id="currentStatusText">
+                    <span data-translate="status-on-review">Очікує Перевірки Викладачем</span>
+                </div>
+                
+                <p class="text-muted mt-3 mb-4" id="deadlineText">
+                    <span data-translate="deadline-text">Крайній термін для перевірки:</span> 28.11.2025
+                </p>
+                
+                <div class="appeal-section">
+                    <p class="fw-semibold mb-3" data-translate="appeal-question">Хочете оскаржити результат?</p>
+                    <button class="btn btn-warning btn-lg" id="appealButton" data-translate="appeal-button">
+                        Оскаржити результат
+                    </button>
+                    <p class="text-success mt-2 d-none" id="appealSuccess" data-translate="appeal-sent">
+                        Заявка на оспорювання відправлена Завідувачу Кафедри!
+                    </p>
+                </div>
+                
+            </div>
+            
+            <div id="noTestSection" class="alert alert-info d-none">
+                <p class="fw-bold" data-translate="no-test">Тест ще не здано. Будь ласка, здайте тест на попередній сторінці.</p>
+                <a href="quest.html" class="btn btn-primary mt-3">Перейти до Заліку</a>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">hai-guys.space</div>
+            <p class="footer-text" data-translate="footer-text">
+                Стежте за нашими наступними проектами!
+            </p>
+        </div>
+    </footer>
+    
+    <script src="main.js"></script> 
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Ініціалізація мови
+            SSRM.langManager.init(); 
+            
+            // 2. Імітація перевірки статусу автентифікації
+            if (!SSRM.Auth.isAuthenticated()) {
+                // Якщо не залогінений, перенаправляємо на логін студента
+                window.location.href = 'student_login.html';
+                return;
+            }
+
+            // 3. Імітація отримання даних студента (для демонстрації)
+            // У реальному проекті це був би AJAX-запит до сервера
+            const mockData = {
+                studentName: 'Іванов Іван (ПМ-21)',
+                // Можливі статуси: 'REVIEW', 'PASSED', 'FAILED', 'NONE'
+                status: 'FAILED', 
+                reviewDeadline: new Date(new Date().getTime() - (3 * 24 * 60 * 60 * 1000)), // Приклад: Прострочено 3 дні
+                // status: 'PASSED', reviewDeadline: new Date(Date.now() + (5 * 24 * 60 * 60 * 1000)),
+                // status: 'REVIEW', reviewDeadline: new Date(Date.now() + (10 * 24 * 60 * 60 * 1000)),
+                hasAppealed: false
+            };
+            
+            // 4. Оновлення інформації студента
+            document.getElementById('studentInfo').textContent = 
+                `${SSRM.langManager.translate('student')}: ${mockData.studentName}`;
+
+
+            const statusTextEl = document.getElementById('currentStatusText');
+            const statusBoxEl = document.getElementById('statusDisplay');
+            const deadlineTextEl = document.getElementById('deadlineText');
+            const appealButtonEl = document.getElementById('appealButton');
+            const noTestSectionEl = document.getElementById('noTestSection');
+
+            // 5. Логіка відображення статусу
+            function updateStatusDisplay(status, deadline) {
+                // Скидаємо класи
+                statusTextEl.className = 'status-box';
+                deadlineTextEl.classList.remove('d-none');
+                appealButtonEl.classList.remove('d-none');
+                statusBoxEl.classList.remove('d-none');
+                noTestSectionEl.classList.add('d-none');
+                
+                let statusTranslationKey;
+                let deadlineDisplay = SSRM.formatDate(deadline, SSRM.langManager.getCurrentLanguage());
+                
+                // Перевірка на прострочення (використовуємо SSRM.calculateUrgency)
+                const urgency = SSRM.calculateUrgency(deadline);
+
+                if (status === 'NONE') {
+                    // Якщо тест ще не здано
+                    statusBoxEl.classList.add('d-none');
+                    noTestSectionEl.classList.remove('d-none');
+                    return;
+                } else if (status === 'REVIEW') {
+                    statusTextEl.classList.add('status-review');
+                    statusTranslationKey = 'status-on-review';
+                } else if (status === 'PASSED') {
+                    statusTextEl.classList.add('status-passed');
+                    statusTranslationKey = 'status-passed';
+                    appealButtonEl.classList.add('d-none'); // Немає сенсу оскаржувати залік
+                } else if (status === 'FAILED') {
+                    if (urgency.daysLeft < -7) { 
+                        // Якщо незалік і термін перевірки прострочено більше ніж на 7 днів, переходимо в режим аудиту/прострочення
+                        statusTextEl.classList.add('status-overdue');
+                        statusTranslationKey = 'status-overdue';
+                        deadlineDisplay = urgency.displayDays;
+                    } else {
+                        statusTextEl.classList.add('status-failed');
+                        statusTranslationKey = 'status-failed';
+                    }
+                }
+
+                // Встановлюємо текст статусу
+                statusTextEl.querySelector('span').setAttribute('data-translate', statusTranslationKey);
+                statusTextEl.querySelector('span').textContent = SSRM.langManager.translate(statusTranslationKey);
+                
+                // Встановлюємо текст дедлайну (або його відсутність для PASSED)
+                if (status !== 'PASSED') {
+                     deadlineTextEl.innerHTML = `${SSRM.langManager.translate('deadline-text')} <span class="fw-bold">${deadlineDisplay}</span>`;
+                } else {
+                    deadlineTextEl.classList.add('d-none');
+                }
+
+                // Обробка оскарження
+                if (mockData.hasAppealed) {
+                    appealButtonEl.classList.add('d-none');
+                    document.getElementById('appealSuccess').classList.remove('d-none');
+                }
+
+            }
+
+            // Запуск оновлення
+            updateStatusDisplay(mockData.status, mockData.reviewDeadline);
+
+
+            // 6. Обробник кнопки апеляції
+            appealButtonEl.addEventListener('click', () => {
+                if (mockData.status === 'FAILED') {
+                    // Імітація відправки апеляції
+                    mockData.hasAppealed = true;
+                    SSRM.toast.warning(SSRM.langManager.translate('appeal-sent'), 5000);
+                    appealButtonEl.classList.add('d-none');
+                    document.getElementById('appealSuccess').classList.remove('d-none');
+                } else {
+                    SSRM.toast.error("Оскаржити можна лише 'НЕ ЗАЛІК'!", 3000);
+                }
+            });
+
+            // Додаємо обробку зміни мови після ініціалізації
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Повторно оновлюємо статус після зміни мови, щоб перекласти терміни
+                    setTimeout(() => {
+                        updateStatusDisplay(mockData.status, mockData.reviewDeadline);
+                    }, 50);
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
