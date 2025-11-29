@@ -136,6 +136,10 @@ const translations = {
         'today': 'СЬОГОДНІ!',
         'days': 'дн.',
         'overdue': 'ПРОСТРОЧЕНО'
+
+       //  ДОДАДКОВІ РЯДКИ:
+        'page-subtitle-student': 'Швидкий та безпечний спосіб здати залік онлайн',
+        'select-yourself': 'Виберіть себе...',
     },
     
     en: {
@@ -267,6 +271,10 @@ const translations = {
         'today': 'TODAY!',
         'days': 'days',
         'overdue': 'OVERDUE'
+
+         // ДОДАДКОВІ РЯДКИ:
+        'page-subtitle-student': 'Fast and secure way to pass the exam online',
+        'select-yourself': 'Select yourself...',
     }
 };
 
