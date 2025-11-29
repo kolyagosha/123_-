@@ -377,7 +377,7 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
-            <div class="footer-logo">hai-guys-space</div>
+            <div class="footer-logo">hai-guys.space</div>
             <p class="footer-text" data-translate="footer-text">
                 Стежте за нашими наступними проектами!
             </p>
@@ -387,170 +387,238 @@
     <script src="main.js"></script>
     <script>
         // ========================================
-        // STUDENT LOGIN PAGE LOGIC
-        // ========================================
+// STUDENT LOGIN PAGE LOGIC (ВИПРАВЛЕНО)
+// ========================================
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // Populate student select dropdown
-            populateStudentSelect();
+document.addEventListener('DOMContentLoaded', () => {
+    // ✅ КРИТИЧНЕ ВИПРАВЛЕННЯ #1: Перевірка повторного входу
+    if (SSRM.Auth.isAuthenticated() && SSRM.Auth.getCurrentUser().type === 'student') {
+        // Якщо студент вже залогінений - редірект на quest
+        window.location.href = 'student_ultimate_quest.html';
+        return;
+    }
 
-            // Form handlers
-            document.getElementById('verificationForm').addEventListener('submit', handleVerification);
-            document.getElementById('setupForm').addEventListener('submit', handleSetup);
+    // Populate student select dropdown
+    populateStudentSelect();
 
-            // Health restriction toggle
-            document.getElementById('healthRestriction').addEventListener('change', toggleRestrictionField);
+    // Form handlers
+    document.getElementById('verificationForm').addEventListener('submit', handleVerification);
+    document.getElementById('setupForm').addEventListener('submit', handleSetup);
+
+    // Health restriction toggle
+    document.getElementById('healthRestriction').addEventListener('change', toggleRestrictionField);
+
+    // ✅ ВИПРАВЛЕННЯ #2: Оновлення списку при зміні мови
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            setTimeout(() => {
+                // Очищаємо та перезаповнюємо список
+                const select = document.getElementById('studentSelect');
+                const currentValue = select.value; // Зберігаємо вибір
+                select.innerHTML = '<option value="" data-translate="select-yourself">Виберіть себе...</option>';
+                populateStudentSelect();
+                select.value = currentValue; // Відновлюємо вибір
+            }, 50);
         });
+    });
+});
 
-        // Populate student dropdown with mock data
-        function populateStudentSelect() {
-            const select = document.getElementById('studentSelect');
-            const currentLang = SSRM.langManager.getCurrentLanguage();
-            
-            SSRM.mockStudentData.forEach(student => {
-                const option = document.createElement('option');
-                option.value = student.id;
-                option.textContent = currentLang === 'uk' ? student.name : student.nameEn;
-                select.appendChild(option);
-            });
-        }
+// Populate student dropdown with mock data
+function populateStudentSelect() {
+    const select = document.getElementById('studentSelect');
+    const currentLang = SSRM.langManager.getCurrentLanguage();
+    
+    SSRM.mockStudentData.forEach(student => {
+        const option = document.createElement('option');
+        option.value = student.id;
+        option.textContent = currentLang === 'uk' ? student.name : student.nameEn;
+        select.appendChild(option);
+    });
+}
 
-        // Toggle health restriction details
-        function toggleRestrictionField() {
-            const checkbox = document.getElementById('healthRestriction');
-            const details = document.getElementById('restrictionDetails');
-            
-            if (checkbox.checked) {
-                details.classList.add('show');
-            } else {
-                details.classList.remove('show');
-            }
-        }
+// Toggle health restriction details
+function toggleRestrictionField() {
+    const checkbox = document.getElementById('healthRestriction');
+    const details = document.getElementById('restrictionDetails');
+    
+    if (checkbox.checked) {
+        details.classList.add('show');
+    } else {
+        details.classList.remove('show');
+    }
+}
 
-        // Handle Step 1: Verification
-        function handleVerification(event) {
-            event.preventDefault();
-            
-            const studentId = document.getElementById('studentSelect').value;
-            const universityCode = document.getElementById('universityCode').value.toUpperCase().trim();
-            const messageDiv = document.getElementById('verificationMessage');
-            
-            // Validation
-            if (!studentId) {
-                SSRM.toast.error('Будь ласка, виберіть себе зі списку');
-                return;
-            }
-            
-            if (!universityCode) {
-                SSRM.toast.error('Введіть код активації');
-                return;
-            }
-            
-            // Find student in mock data
-            const selectedStudent = SSRM.mockStudentData.find(s => s.id === studentId);
-            
-            if (selectedStudent && selectedStudent.code === universityCode) {
-                // SUCCESS!
-                messageDiv.innerHTML = `<div class="alert alert-success" data-translate="code-correct">
-                    ✅ Код вірний! Переходимо до створення акаунту...
-                </div>`;
-                
-                SSRM.toast.success(SSRM.langManager.translate('code-correct'));
-                
-                // Save student ID
-                SSRM.Storage.set('currentStudentId', studentId);
-                
-                // Show step 2 after delay
-                setTimeout(() => {
-                    document.getElementById('verificationSection').style.display = 'none';
-                    document.getElementById('setupSection').style.display = 'block';
-                    
-                    // Smooth scroll to top
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }, 1500);
-                
-            } else {
-                // ERROR
-                messageDiv.innerHTML = `<div class="alert alert-danger" data-translate="code-incorrect">
-                    ❌ Невірний код або студент. Перевірте дані.
-                </div>`;
-                
-                SSRM.toast.error(SSRM.langManager.translate('code-incorrect'));
-            }
-        }
-
-        // Handle Step 2: Profile Setup
-        function handleSetup(event) {
-            event.preventDefault();
-            
-            const email = document.getElementById('userEmail').value;
-            const password = document.getElementById('userPassword').value;
-            const age = document.getElementById('userAge').value;
-            const height = document.getElementById('userHeight').value;
-            const weight = document.getElementById('userWeight').value;
-            const hasRestriction = document.getElementById('healthRestriction').checked;
-            const messageDiv = document.getElementById('setupMessage');
-            
-            // Validation
-            if (!SSRM.FormValidator.validateEmail(email)) {
-                SSRM.toast.error('Невірний формат email');
-                SSRM.FormValidator.showError(
-                    document.getElementById('userEmail'), 
-                    'Невірний формат email'
-                );
-                return;
-            }
-            
-            if (!SSRM.FormValidator.validatePassword(password)) {
-                SSRM.toast.error('Пароль має бути мінімум 6 символів');
-                SSRM.FormValidator.showError(
-                    document.getElementById('userPassword'), 
-                    'Мінімум 6 символів'
-                );
-                return;
-            }
-            
-            if (!SSRM.FormValidator.validateNumber(age, 16, 100)) {
-                SSRM.toast.error('Вік має бути від 16 до 100 років');
-                return;
-            }
-            
-            // Clear any previous errors
-            SSRM.FormValidator.clearError(document.getElementById('userEmail'));
-            SSRM.FormValidator.clearError(document.getElementById('userPassword'));
-            
-            // Get student data
-            const studentId = SSRM.Storage.get('currentStudentId');
-            const student = SSRM.mockStudentData.find(s => s.id === studentId);
-            
-            // Create profile object
-            const profile = {
-                studentId: studentId,
-                email: email,
-                age: parseInt(age),
-                height: parseInt(height),
-                weight: parseInt(weight),
-                hasRestriction: hasRestriction,
-                faculty: student.faculty,
-                group: student.group,
-                createdAt: new Date().toISOString()
-            };
-            
-            // Save profile (in real app: Firebase)
-            SSRM.Storage.set('studentProfile', profile);
-            
-            // Show success message
-            messageDiv.innerHTML = `<div class="alert alert-success" data-translate="account-created">
-                🎉 Акаунт створено! Перехід до тесту...
+// Handle Step 1: Verification
+function handleVerification(event) {
+    event.preventDefault();
+    
+    const studentId = document.getElementById('studentSelect').value;
+    const universityCode = document.getElementById('universityCode').value.toUpperCase().trim();
+    const messageDiv = document.getElementById('verificationMessage');
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    
+    // Validation
+    if (!studentId) {
+        SSRM.toast.error('Будь ласка, виберіть себе зі списку');
+        return;
+    }
+    
+    if (!universityCode) {
+        SSRM.toast.error('Введіть код активації');
+        return;
+    }
+    
+    // ✅ ВИПРАВЛЕННЯ #3: Додано індикатор завантаження
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span>⏳ Перевірка...</span>';
+    
+    // Симулюємо затримку запиту (в реальному проекті - AJAX)
+    setTimeout(() => {
+        // Find student in mock data
+        const selectedStudent = SSRM.mockStudentData.find(s => s.id === studentId);
+        
+        if (selectedStudent && selectedStudent.code === universityCode) {
+            // SUCCESS!
+            messageDiv.innerHTML = `<div class="alert alert-success" data-translate="code-correct">
+                ✅ Код вірний! Переходимо до створення акаунту...
             </div>`;
             
-            SSRM.toast.success(SSRM.langManager.translate('account-created'), 3000);
+            SSRM.toast.success(SSRM.langManager.translate('code-correct'));
             
-            // Redirect to quest page
+            // Save student ID temporarily
+            SSRM.Storage.set('pendingStudentId', studentId);
+            
+            // Show step 2 after delay
             setTimeout(() => {
-                window.location.href = 'student_ultimate_quest.html';
-            }, 2000);
+                document.getElementById('verificationSection').style.display = 'none';
+                document.getElementById('setupSection').style.display = 'block';
+                
+                // Smooth scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 1500);
+            
+        } else {
+            // ERROR
+            messageDiv.innerHTML = `<div class="alert alert-danger" data-translate="code-incorrect">
+                ❌ Невірний код або студент. Перевірте дані.
+            </div>`;
+            
+            SSRM.toast.error(SSRM.langManager.translate('code-incorrect'));
+            
+            // ✅ Відновлюємо кнопку
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span data-translate="verify-button">Перевірити та Активувати</span>';
         }
+    }, 800); // Затримка 800мс
+}
+
+// Handle Step 2: Profile Setup
+function handleSetup(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('userEmail').value.trim();
+    const password = document.getElementById('userPassword').value;
+    const age = document.getElementById('userAge').value;
+    const height = document.getElementById('userHeight').value;
+    const weight = document.getElementById('userWeight').value;
+    const hasRestriction = document.getElementById('healthRestriction').checked;
+    const messageDiv = document.getElementById('setupMessage');
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    
+    // Validation
+    if (!SSRM.FormValidator.validateEmail(email)) {
+        SSRM.toast.error('Невірний формат email');
+        SSRM.FormValidator.showError(
+            document.getElementById('userEmail'), 
+            'Невірний формат email'
+        );
+        return;
+    }
+    
+    if (!SSRM.FormValidator.validatePassword(password)) {
+        SSRM.toast.error('Пароль має бути мінімум 6 символів');
+        SSRM.FormValidator.showError(
+            document.getElementById('userPassword'), 
+            'Мінімум 6 символів'
+        );
+        return;
+    }
+    
+    if (!SSRM.FormValidator.validateNumber(age, 16, 100)) {
+        SSRM.toast.error('Вік має бути від 16 до 100 років');
+        return;
+    }
+    
+    if (!SSRM.FormValidator.validateNumber(height, 140, 250)) {
+        SSRM.toast.error('Зріст має бути від 140 до 250 см');
+        return;
+    }
+    
+    if (!SSRM.FormValidator.validateNumber(weight, 40, 200)) {
+        SSRM.toast.error('Вага має бути від 40 до 200 кг');
+        return;
+    }
+    
+    // Clear any previous errors
+    SSRM.FormValidator.clearError(document.getElementById('userEmail'));
+    SSRM.FormValidator.clearError(document.getElementById('userPassword'));
+    
+    // ✅ Індикатор завантаження
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span>⏳ Створення акаунту...</span>';
+    
+    // Симулюємо створення акаунту
+    setTimeout(() => {
+        // Get student data
+        const studentId = SSRM.Storage.get('pendingStudentId');
+        const student = SSRM.mockStudentData.find(s => s.id === studentId);
+        
+        if (!student) {
+            SSRM.toast.error('Помилка: студента не знайдено');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span data-translate="create-account">Створити Акаунт та Продовжити</span>';
+            return;
+        }
+        
+        // ✅ КРИТИЧНЕ ВИПРАВЛЕННЯ #4: Зберігаємо ПАРОЛЬ і ІМ'Я
+        const profile = {
+            studentId: studentId,
+            studentName: student.name, // ✅ Додано ім'я
+            email: email,
+            password: password, // ✅ КРИТИЧНЕ: Додано пароль
+            age: parseInt(age),
+            height: parseInt(height),
+            weight: parseInt(weight),
+            hasRestriction: hasRestriction,
+            faculty: student.faculty,
+            group: student.group,
+            assignedInstructorId: student.assignedInstructorId,
+            createdAt: new Date().toISOString()
+        };
+        
+        // Save profile to localStorage
+        SSRM.Storage.set('studentProfile', profile);
+        
+        // ✅ КРИТИЧНЕ ВИПРАВЛЕННЯ #5: Встановлюємо сесію
+        SSRM.Auth.login(studentId, 'student');
+        
+        // Видаляємо тимчасовий ID
+        SSRM.Storage.remove('pendingStudentId');
+        
+        // Show success message
+        messageDiv.innerHTML = `<div class="alert alert-success" data-translate="account-created">
+            🎉 Акаунт створено! Перехід до тесту...
+        </div>`;
+        
+        SSRM.toast.success(SSRM.langManager.translate('account-created'), 3000);
+        
+        // Redirect to quest page
+        setTimeout(() => {
+            window.location.href = 'student_ultimate_quest.html';
+        }, 2000);
+        
+    }, 1000); // Затримка 1 секунда
+}
     </script>
 </body>
 </html>
