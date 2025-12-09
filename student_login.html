@@ -386,19 +386,21 @@
 
     <script src="main.js"></script>
     <script>
-        // ========================================
-// STUDENT LOGIN PAGE LOGIC (ВИПРАВЛЕНО)
+// ========================================
+// STUDENT LOGIN PAGE LOGIC (ВИПРАВЛЕНО v2)
 // ========================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // ✅ КРИТИЧНЕ ВИПРАВЛЕННЯ #1: Перевірка повторного входу
+    // ✅ КРИТИЧНЕ: Спочатку ініціалізуємо мову!
+    SSRM.langManager.init();
+    
+    // ✅ Перевірка повторного входу
     if (SSRM.Auth.isAuthenticated() && SSRM.Auth.getCurrentUser().type === 'student') {
-        // Якщо студент вже залогінений - редірект на quest
         window.location.href = 'student_ultimate_quest.html';
         return;
     }
 
-    // Populate student select dropdown
+    // ✅ ТЕПЕР можна заповнювати список (після ініціалізації мови)
     populateStudentSelect();
 
     // Form handlers
@@ -408,16 +410,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // Health restriction toggle
     document.getElementById('healthRestriction').addEventListener('change', toggleRestrictionField);
 
-    // ✅ ВИПРАВЛЕННЯ #2: Оновлення списку при зміні мови
+    // ✅ Оновлення списку при зміні мови
     document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             setTimeout(() => {
-                // Очищаємо та перезаповнюємо список
                 const select = document.getElementById('studentSelect');
-                const currentValue = select.value; // Зберігаємо вибір
-                select.innerHTML = '<option value="" data-translate="select-yourself">Виберіть себе...</option>';
+                const currentValue = select.value;
+                
+                // Очищаємо список (залишаємо тільки placeholder)
+                select.innerHTML = '';
+                
+                // Додаємо placeholder опцію з перекладом
+                const placeholderOption = document.createElement('option');
+                placeholderOption.value = '';
+                placeholderOption.textContent = SSRM.langManager.translate('select-yourself');
+                select.appendChild(placeholderOption);
+                
+                // Заповнюємо список заново
                 populateStudentSelect();
-                select.value = currentValue; // Відновлюємо вибір
+                
+                // Відновлюємо вибір
+                select.value = currentValue;
             }, 50);
         });
     });
@@ -428,12 +441,17 @@ function populateStudentSelect() {
     const select = document.getElementById('studentSelect');
     const currentLang = SSRM.langManager.getCurrentLanguage();
     
+    console.log('Заповнюємо список. Мова:', currentLang); // Для дебагу
+    console.log('Студенти:', SSRM.mockStudentData); // Для дебагу
+    
     SSRM.mockStudentData.forEach(student => {
         const option = document.createElement('option');
         option.value = student.id;
         option.textContent = currentLang === 'uk' ? student.name : student.nameEn;
         select.appendChild(option);
     });
+    
+    console.log('Список заповнено. Кількість опцій:', select.options.length); // Для дебагу
 }
 
 // Toggle health restriction details
@@ -459,7 +477,7 @@ function handleVerification(event) {
     
     // Validation
     if (!studentId) {
-        SSRM.toast.error('Будь ласка, виберіть себе зі списку');
+        SSRM.toast.error(SSRM.langManager.translate('select-yourself') || 'Будь ласка, виберіть себе зі списку');
         return;
     }
     
@@ -468,48 +486,42 @@ function handleVerification(event) {
         return;
     }
     
-    // ✅ ВИПРАВЛЕННЯ #3: Додано індикатор завантаження
+    // Індикатор завантаження
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span>⏳ Перевірка...</span>';
     
-    // Симулюємо затримку запиту (в реальному проекті - AJAX)
+    // Симулюємо затримку запиту
     setTimeout(() => {
-        // Find student in mock data
         const selectedStudent = SSRM.mockStudentData.find(s => s.id === studentId);
         
         if (selectedStudent && selectedStudent.code === universityCode) {
-            // SUCCESS!
-            messageDiv.innerHTML = `<div class="alert alert-success" data-translate="code-correct">
-                ✅ Код вірний! Переходимо до створення акаунту...
+            // SUCCESS
+            messageDiv.innerHTML = `<div class="alert alert-success">
+                ✅ ${SSRM.langManager.translate('code-correct')}
             </div>`;
             
             SSRM.toast.success(SSRM.langManager.translate('code-correct'));
             
-            // Save student ID temporarily
             SSRM.Storage.set('pendingStudentId', studentId);
             
-            // Show step 2 after delay
             setTimeout(() => {
                 document.getElementById('verificationSection').style.display = 'none';
                 document.getElementById('setupSection').style.display = 'block';
-                
-                // Smooth scroll to top
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }, 1500);
             
         } else {
             // ERROR
-            messageDiv.innerHTML = `<div class="alert alert-danger" data-translate="code-incorrect">
-                ❌ Невірний код або студент. Перевірте дані.
+            messageDiv.innerHTML = `<div class="alert alert-danger">
+                ❌ ${SSRM.langManager.translate('code-incorrect')}
             </div>`;
             
             SSRM.toast.error(SSRM.langManager.translate('code-incorrect'));
             
-            // ✅ Відновлюємо кнопку
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span data-translate="verify-button">Перевірити та Активувати</span>';
+            submitBtn.innerHTML = `<span>${SSRM.langManager.translate('verify-button')}</span>`;
         }
-    }, 800); // Затримка 800мс
+    }, 800);
 }
 
 // Handle Step 2: Profile Setup
@@ -559,33 +571,31 @@ function handleSetup(event) {
         return;
     }
     
-    // Clear any previous errors
+    // Clear errors
     SSRM.FormValidator.clearError(document.getElementById('userEmail'));
     SSRM.FormValidator.clearError(document.getElementById('userPassword'));
     
-    // ✅ Індикатор завантаження
+    // Індикатор завантаження
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span>⏳ Створення акаунту...</span>';
     
-    // Симулюємо створення акаунту
     setTimeout(() => {
-        // Get student data
         const studentId = SSRM.Storage.get('pendingStudentId');
         const student = SSRM.mockStudentData.find(s => s.id === studentId);
         
         if (!student) {
             SSRM.toast.error('Помилка: студента не знайдено');
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span data-translate="create-account">Створити Акаунт та Продовжити</span>';
+            submitBtn.innerHTML = `<span>${SSRM.langManager.translate('create-account')}</span>`;
             return;
         }
         
-        // ✅ КРИТИЧНЕ ВИПРАВЛЕННЯ #4: Зберігаємо ПАРОЛЬ і ІМ'Я
+        // Створюємо профіль з паролем
         const profile = {
             studentId: studentId,
-            studentName: student.name, // ✅ Додано ім'я
+            studentName: student.name,
             email: email,
-            password: password, // ✅ КРИТИЧНЕ: Додано пароль
+            password: password,
             age: parseInt(age),
             height: parseInt(height),
             weight: parseInt(weight),
@@ -596,28 +606,21 @@ function handleSetup(event) {
             createdAt: new Date().toISOString()
         };
         
-        // Save profile to localStorage
         SSRM.Storage.set('studentProfile', profile);
-        
-        // ✅ КРИТИЧНЕ ВИПРАВЛЕННЯ #5: Встановлюємо сесію
         SSRM.Auth.login(studentId, 'student');
-        
-        // Видаляємо тимчасовий ID
         SSRM.Storage.remove('pendingStudentId');
         
-        // Show success message
-        messageDiv.innerHTML = `<div class="alert alert-success" data-translate="account-created">
-            🎉 Акаунт створено! Перехід до тесту...
+        messageDiv.innerHTML = `<div class="alert alert-success">
+            🎉 ${SSRM.langManager.translate('account-created')}
         </div>`;
         
         SSRM.toast.success(SSRM.langManager.translate('account-created'), 3000);
         
-        // Redirect to quest page
         setTimeout(() => {
             window.location.href = 'student_ultimate_quest.html';
         }, 2000);
         
-    }, 1000); // Затримка 1 секунда
+    }, 1000);
 }
     </script>
 </body>
